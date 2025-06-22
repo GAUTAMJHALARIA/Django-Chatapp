@@ -2,6 +2,26 @@
 tags: [django, channels, websockets, chat, real-time, python]
 ---
 
+[![Python](https://img.shields.io/badge/python-3.9-blue.svg)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/django-4.0-green.svg)](https://www.djangoproject.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Project Screenshot
+![Project Screenshot](link_to_your_screenshot)
+
+# Django Chatapp 💬
+
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
+
 # Django Chatapp 💬
 
 🚀 A real-time chat application built with Django, Channels, and WebSockets. 🚀
