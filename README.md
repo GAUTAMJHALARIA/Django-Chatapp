@@ -134,25 +134,3 @@ Key features include:
 4.  **Online Users:** 🟢
     -   See the list of online users in the right sidebar, providing a dynamic view of the active community members.
 
-## Contributing 🤝
-
-We welcome contributions to Django Chatapp! If you'd like to contribute, please follow these steps:
-
-1.  **Fork the repository:** 🍴
-    -   Fork the repository to your GitHub account.
-2.  **Create a new branch:** 🌿
-    -   Create a new branch for your feature or bug fix.
-3.  **Make your changes:** ✍️
-    -   Make your changes and commit them with descriptive commit messages.
-4.  **Test your changes:** ✅
-    -   Test your changes thoroughly to ensure they work as expected.
-5.  **Submit a pull request:** 📤
-    -   Submit a pull request to the main branch of the repository.
-
-## License 📜
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contact 📧
-
-For questions or support, please contact [Your Name](your.email@example.com) or visit our [website](https://www.example.com).
