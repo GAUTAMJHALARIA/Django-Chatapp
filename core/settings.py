@@ -11,21 +11,40 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from environ import Env
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = Env()
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    Env.read_env(env_file)
+
+ENVIRONMENT = env('ENVIRONMENT', default="production")
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-vc+ysw&5ayr^inh#+6)2!xx7c0^_ze-*rq@p9x$muca%il8i23"
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+if ENVIRONMENT == 'development':
+    DEBUG = True
+else:
+    DEBUG = False
 
 ALLOWED_HOSTS = ['localhost','127.0.0.1','*']
+
+INTERNAL_IPS = (
+    '127.0.0.1',
+    'localhost:8000'
+)
 
 
 # Application definition
@@ -48,6 +67,8 @@ EXTERNAL_APPS = [
     'allauth.account',
     'allauth.socialaccount',
     'django_htmx',
+    'cloudinary_storage',
+    'cloudinary',
 ]
 
 INSTALLED_APPS += EXTERNAL_APPS
@@ -65,6 +86,7 @@ MIDDLEWARE = [
 EXTERNAL_MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django_htmx.middleware.HtmxMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware'
 ]
 
 MIDDLEWARE += EXTERNAL_MIDDLEWARE
@@ -85,7 +107,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                'django.template.context_processors.request'
+                'django.template.context_processors.debug'
             ],
         },
     },
@@ -94,22 +116,38 @@ TEMPLATES = [
 #WSGI_APPLICATION = "core.wsgi.application"
 ASGI_APPLICATION = "core.asgi.application"
 
+# CHANNEL_LAYERS = {
+#     'default':{
+#         "BACKEND": "channels.layers.InMemoryChannelLayer"
+#     }
+# }
+
 CHANNEL_LAYERS = {
-    'default':{
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [('redis://default:ZjMOfhyqrigQvxIgCpIFegtHnVLaHLox@switchback.proxy.rlwy.net:26080')],
+        },
+    },
 }
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if ENVIRONMENT == 'development':
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(env('DATABASE_URL'))
+    }
+    
 
 
 # Password validation
@@ -148,9 +186,25 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [ BASE_DIR/ 'static' ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / 'media'
+
+if ENVIRONMENT == 'development':
+    MEDIA_ROOT = BASE_DIR / 'media'
+else:
+    # Configure Cloudinary for production
+    STORAGES = {
+        "default": {
+            "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    CLOUDINARY_STORAGE = {
+        'CLOUDINARY_URL' : env('CLOUDINARY_URL')
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -159,6 +213,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = '/'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = env('EMAIL_ADDRESS')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = f"VARTALAB {env('EMAIL_ADDRESS')}"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ''
+
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
