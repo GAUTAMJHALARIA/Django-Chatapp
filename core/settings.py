@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from environ import Env
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites"
 ]
 EXTERNAL_APPS = [
     "home",
@@ -72,6 +74,8 @@ EXTERNAL_APPS = [
 ]
 
 INSTALLED_APPS += EXTERNAL_APPS
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -121,15 +125,21 @@ ASGI_APPLICATION = "core.asgi.application"
 #         "BACKEND": "channels.layers.InMemoryChannelLayer"
 #     }
 # }
-
-CHANNEL_LAYERS = {
+if ENVIRONMENT == 'development':
+    CHANNEL_LAYERS = {
+        'default':{
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
+        }
+    }
+else:
+    CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [('redis://default:ZjMOfhyqrigQvxIgCpIFegtHnVLaHLox@switchback.proxy.rlwy.net:26080')],
+            "hosts": [(env('REDIS_URL'))],
         },
     },
-}
+    }
 
 
 # Database
@@ -143,7 +153,6 @@ if ENVIRONMENT == 'development':
         }
     }
 else:
-    import dj_database_url
     DATABASES = {
         'default': dj_database_url.parse(env('DATABASE_URL'))
     }

@@ -1,11 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User
+import shortuuid
 
 class ChatGroup(models.Model):
-    group_name = models.CharField(max_length=128,unique=True)
+    group_name = models.CharField(max_length=128,unique=True, blank=True)
     users_online = models.ManyToManyField(User, related_name='onlne_in_groups',blank=True)
     def __str__(self):
         return self.group_name
+    
+    def save(self,*args,**kwargs):
+        if not self.group_name:
+            self.group_name = shortuuid.uuid()
+        super().save(*args,**kwargs)
     
 class GroupMessage(models.Model):
     group = models.ForeignKey(ChatGroup, related_name='chat_messages', on_delete=models.CASCADE)
